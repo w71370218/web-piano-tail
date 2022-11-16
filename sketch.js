@@ -22,7 +22,7 @@ class Button {
 
 class MenuItem {
   start(number, name, time) {
-    this.min = int(time) / 60;
+    this.min = ~~(time / 60);
     this.sec = int(time) % 60;
     this.text = name;
     if (this.text.length >= 19) {
@@ -34,7 +34,7 @@ class MenuItem {
     this.h = 150;
     this.x = 600 + offsetwidth;
     this.y = 15 + this.num * 30 + this.num * this.h;
-    this.py = y;
+    this.py = this.y;
     this.r = 70;
     this.g = 130;
     this.b = 180;
@@ -42,17 +42,17 @@ class MenuItem {
   display() {
     noStroke();
     if (this.y > this.py) {
-      this.y -= 60;
+      this.y -= 45;
     }
     if (this.y < this.py) {
-      this.y += 60;
+      this.y += 45;
     }
 
     if (this.y == 15 + 2 * 30 + 2 * this.h) {
       this.x = 600 + offsetwidth;
       stroke(255);
-      strokeWeight(10);
-      fill(110, 170, 220);
+      strokeWeight(5);
+      fill(170, 170, 170);
     } else {
       this.x = 630 + offsetwidth;
       noStroke();
@@ -93,10 +93,10 @@ const percent_h = screen_h / 900;
 
 let file = [];
 let countdown_sound;
-let numsounds;
+let numsounds = 0;
 let numPic = 2; //picture of music
 let music_index;
-let music_on;
+let music_on = true;
 
 let num = 20;
 let m = 15;
@@ -160,6 +160,7 @@ let menu = new Button();
 let menulist = [];
 
 let music_file = [];
+let music_name = [];
 
 //let table = new Table();/////
 let maps = [];
@@ -171,6 +172,7 @@ let maps = [];
 
 
 function preload() {
+
   let music_list;
   fetch("./music_list.json").then(response => {
     return response.json();
@@ -182,30 +184,31 @@ function preload() {
     console.log(item);
   })
   */
-  /*
+
   httpRequest = new XMLHttpRequest();
-  httpRequest.open('GET', './assets/music',true);
+  httpRequest.open('GET', './assets/music', true);
   httpRequest.send();
-  httpRequest.onreadystatechange = function() {
+  httpRequest.onreadystatechange = function () {
     if (httpRequest.readyState === 4) {
       html = httpRequest.response;
-      console.log(html);
+      //console.log(html);
       var d = $(html);
       d[13].getElementsByTagName('a').forEach((ele) => {
-        console.log(ele);
-        if (ele.getAttribute("href").includes(".mp3")){
-          music_filed = ele.href.replace((window.location.href).replace("game.html",""),"");
+        //console.log(ele);
+
+        if (ele.getAttribute("href").includes(".mp3")) {
+          music_filed = ele.href.replace((window.location.href).replace("game.html", ""), "");
           //console.log(music_filed);
-          music_file.push (loadSound(music_filed));
-          music_name = music_filed.replace("assets/music/","");
+          music_file.push(loadSound(music_filed));
+          console.log(ele.getElementsByClassName('name')[0].innerText.replace(".mp3", ""))
+          music_name.push(ele.getElementsByClassName('name')[0].innerText.replace(".mp3", ""));
           //music_file.push(music_name);
-          numsounds +=1;
+          numsounds += 1;
         }
 
       });
     }
   }
-  */
 
   //m = loadSound('assets/music/La Campanella.mp3');
 }
@@ -239,7 +242,7 @@ function setup() {
 
   for (let i = 0; i < music_file.length; i++) {
     menulist[i] = new MenuItem();
-    menulist[i].start(i, "123", music_file[i].duration());
+    menulist[i].start(i, music_name[i], music_file[i].duration());
   }
 }
 
@@ -377,8 +380,7 @@ function draw() {
       for (let i = 0; i < numsounds; i++) {
         music_file[i].stop();
       }
-      //music_file[music_index].cue(music_file[music_index].duration()/2);
-      music_file[music_index].play();
+      music_file[music_index].play(0, 1, 1, music_file[music_index].duration() / 2, 20);
       music_on = false;
     }
 
@@ -396,12 +398,13 @@ function draw() {
     fill(255);
     ellipse(40, 40, 80, 80);
     fill(0);
+    noStroke();
 
     textSize(60);
     text("←", 10, 60);
     fill(255);
     textSize(20);
-    text("Best With Headphones", 160, 850);
+    text("Best With Headphones", 160 + offsetwidth, 850);
     play = new Button();
     play.start(160, 750, "Play");
     play.display();
@@ -410,7 +413,7 @@ function draw() {
       status = 1;
     }
     if (keyIsPressed == true) {
-      if (key == CODED && keyCode == UP) {
+      if (keyCode == UP_ARROW) {
         if (music_index - 1 != -1) {
           music_index -= 1;
           for (let i = 0; i < numsounds; i++) {
@@ -418,7 +421,7 @@ function draw() {
           }
         }
       }
-      if (key == CODED && keyCode == DOWN) {
+      if (keyCode == DOWN_ARROW) {
         if (music_index + 1 != numsounds) {
           music_index += 1;
           for (let i = 0; i < numsounds; i++) {
@@ -427,7 +430,7 @@ function draw() {
         }
       }
     }
-    if (IsClick(160, 400, 750, 830)) {
+    if (IsClick(160 + offsetwidth, 400, 750, 830)) {
       for (let i = 0; i < numsounds; i++) {
         music_file[i].stop();
       }
